@@ -7,7 +7,7 @@ import { AuthService } from './services/auth.service';
 
 import { CurrentUserInterceptor } from './interceptors/current-user.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { CurrentUserMiddleware } from 'src/middlewares/current-user.middleware';
+import { CurrentUserMiddleware } from '../middlewares/current-user.middleware';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
