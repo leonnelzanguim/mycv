@@ -16,11 +16,14 @@ import { TypeOrmConfigService } from './config/typeorm.config';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV}`,
+      envFilePath: `.env`,
     }),
 
-    TypeOrmModule.forRootAsync({
-      useClass: TypeOrmConfigService,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: 'postgres://api:development_pass@postgres:5432/testapi',
+      synchronize: true,
+      entities: [User, Report],
     }),
     // TypeOrmModule.forRootAsync({
     //   inject: [ConfigService],

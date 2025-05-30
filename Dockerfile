@@ -1,25 +1,31 @@
-# Étape 1 : Build
-FROM node:20-alpine AS builder
+FROM node:18
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
+COPY package.json package-lock.json /app/
+COPY .env .env
 
-COPY . .
+RUN npm install && \
+    rm -rf /tmp/* /var/tmp/*
+
+RUN chown -R node:node /app/*
+
+COPY --chown=node:node  ./docker-utils/init.sh /usr/local/bin/docker-entrypoint.sh
+
+COPY . /app
+
 RUN npm run build
 
-# Étape 2 : Production image
-FROM node:20-alpine
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm install --only=production
-
-COPY --from=builder /app/dist ./dist
-
-# Utilise le port 3000
 EXPOSE 3000
 
-CMD ["node", "dist/main"]
+USER node
+
+ENV TYPEORM_MIGRATION=ENABLE
+
+ENV NPM_INSTALL=ENABLE
+
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
+# CMD npm run start:debug
+CMD ["./start.sh"]

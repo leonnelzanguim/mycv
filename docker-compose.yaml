@@ -1,36 +1,27 @@
-version: '3.8'
-
+volumes:
+  db_data: {}
 services:
-  db:
-    image: postgres:15
-    restart: always
-    environment:
-      POSTGRES_DB: myapp
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
-
   app:
     build: .
-    depends_on:
-      - db
+    # container_name: nestjs-app
+    command: npm run start:debug
     environment:
-      NODE_ENV: production
-      DB_TYPE: postgres
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: myapp
-      DB_USERNAME: myuser
-      DB_PASSWORD: mypassword
-      SYNCHRONIZE: false
-      MIGRATIONS_RUN: true
-      COOKIE_KEY: jbsbdfgvbgvbb
+      NPM_INSTALL: ENABLE
+      TYPEORM_MIGRATION: ENABLE
     ports:
-      - '3000:3000'
-    command: npm run start:prod
-
-volumes:
-  pgdata:
+      - 3000:3000
+    volumes:
+      - ./:/app
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_USER=api
+      - POSTGRES_PASSWORD=development_pass
+      - POSTGRES_MULTIPLE_DATABASES=testapi,testapitesting
+    volumes:
+      - ./docker-utils:/docker-entrypoint-initdb.d
+      - db_data:/data/postgres
+    ports:
+      - 5432:5432
